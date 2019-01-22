@@ -58,7 +58,7 @@ const comments = {
           .child(parentRef)
           .push().key;
 
-        const parentPath = (parentCommentID) ? `${process.env.FRP}/${parentRef}/${parentCommentID}` : `${process.env.FRP}/${parentRef}`;
+        const parentPath = (parentCommentID) ? `${parentRef}/${parentCommentID}` : `${process.env.FRP}/${parentRef}`;
         data.parentRef = parentPath.replace(/^\/|\/$/g, '');
         logger.log('>> data.parentRef : ', data.parentRef);
 
