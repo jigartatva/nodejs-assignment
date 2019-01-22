@@ -59,7 +59,7 @@ const comments = {
           .push().key;
 
         const parentPath = (parentCommentID) ? `${process.env.FRP}/${parentRef}/${parentCommentID}` : `${process.env.FRP}/${parentRef}`;
-        data.parentRef = parentPath.replace(/comments\//g, '').replace(/^\/|\/$/g, '');
+        data.parentRef = parentPath.replace(/^\/|\/$/g, '');
         logger.log('>> data.parentRef : ', data.parentRef);
 
         firebaseDB.ref(`${parentPath}/${commentID}`).set(data, error => {
@@ -103,9 +103,7 @@ async function getParentRef(commentID) {
   });
 
   try {
-    const result = await promise;
-    return result ? `comments/${result}` : false;
-    // return await promise;
+    return await promise;
   } catch (error) {
     return false;
   }
