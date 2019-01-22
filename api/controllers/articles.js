@@ -4,6 +4,7 @@ const common = require('../../services/common');
 const articleSchema = require('../joi/articleSchema');
 
 const articles = {
+  // GET /articles
   index: (req, res) => {
     logger.log('>> articles.index');
     let { offset } = req.query;
@@ -26,6 +27,8 @@ const articles = {
         }
       });
   },
+
+  // GET /articles/:id
   show: (req, res) => {
     logger.log('>> articles.show');
 
@@ -51,6 +54,8 @@ const articles = {
       }
     );
   },
+
+  // POST /articles
   create: (req, res) => {
     logger.log('>> articles.create');
     logger.log('>> req.body : ', req.body);

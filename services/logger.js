@@ -1,3 +1,6 @@
+// For more readable, configurable logging
+// https://github.com/visionmedia/debug#usage
+
 const debug = require('debug');
 
 const error = debug('app:error');

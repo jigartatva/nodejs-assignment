@@ -4,6 +4,7 @@ const common = require('../../services/common');
 const commentSchema = require('../joi/commentSchema');
 
 const comments = {
+  // GET /comments/:articleID
   show: (req, res) => {
     logger.log('>> comments.show');
 
@@ -29,6 +30,8 @@ const comments = {
       }
     );
   },
+
+  // POST /comments/:articleID/:commentID?
   create: async (req, res) => {
     logger.log('>> comments.create');
     logger.log('>> req.body : ', req.body);
@@ -43,9 +46,9 @@ const comments = {
     if (validationResult.isInvalid > 0) {
       res.json(validationResult.invalidResponse);
     } else {
-      const { articleID } = req.params;
-      const parentCommentID = req.body.commentID || '';
+      const { articleID, commentID: parentCommentID } = req.params;
 
+      // Check if the comment is on article or comment
       const parentRef = parentCommentID
         ? await getParentRef(parentCommentID)
         : `comments/${articleID}`;
@@ -53,21 +56,22 @@ const comments = {
       logger.log('>> parentRef : ', parentRef);
       if (parentRef) {
         // Get a key for the new comment.
-        const commentID = firebaseDB
+        const newCommentID = firebaseDB
           .ref()
           .child(parentRef)
           .push().key;
 
+        // Set parentPath based on whether the comment is on article or comment
         const parentPath = (parentCommentID) ? `${parentRef}/${parentCommentID}` : `${process.env.FRP}/${parentRef}`;
         data.parentRef = parentPath.replace(/^\/|\/$/g, '');
         logger.log('>> data.parentRef : ', data.parentRef);
 
-        firebaseDB.ref(`${parentPath}/${commentID}`).set(data, error => {
+        firebaseDB.ref(`${parentPath}/${newCommentID}`).set(data, error => {
           if (error) {
             res.json(common.response(500, `Comment could not be saved. | ${error}`));
           } else {
-            saveCommentRef(commentID, data.parentRef);
-            res.json(common.response(201, 'Comment saved successfully.', { id: commentID }));
+            setParentRef(newCommentID, data.parentRef);
+            res.json(common.response(201, 'Comment saved successfully.', { id: newCommentID }));
           }
         });
       } else {
@@ -80,7 +84,7 @@ const comments = {
 /**
  * To get parentRef of the comment
  *
- * @param   {String}  parentCommentID
+ * @param   {String}  commentID
  *
  * @return  {String}
  */
@@ -110,19 +114,17 @@ async function getParentRef(commentID) {
 }
 
 /**
- * [saveCommentRef description]
+ * To set parentRef of the comment
  *
- * @param   {[type]}  commentID  [commentID description]
- * @param   {[type]}  ref        [ref description]
+ * @param   {String}  commentID
+ * @param   {String}  ref
  *
- * @return  {[type]}             [return description]
+ * @return  {String}
  */
-function saveCommentRef(commentID, ref) {
+function setParentRef(commentID, ref) {
   firebaseDB.ref(`${process.env.FRP}/comment-refs/${commentID}`).set(ref, error => {
     if (error) {
-      logger.error('>> saveCommentRef : ERROR', error);
-    } else {
-      logger.log('>> saveCommentRef : SUCCESS');
+      logger.error('>> setParentRef failed : ', error);
     }
   });
 }

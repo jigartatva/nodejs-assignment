@@ -1,3 +1,5 @@
+// Common functionalities throughout app
+
 const _ = require('lodash');
 const Joi = require('joi');
 
@@ -22,6 +24,7 @@ const validateReq = (obj, schema) => Joi.validate(obj, schema, validationOptions
   return { isInvalid, invalidResponse };
 });
 
+// For standard successful response throughout the API endpoints
 const response = (code = 200, message = '', data = []) => {
   message = message || 'Something went wrong! Please retry later.';
 
@@ -32,6 +35,7 @@ const response = (code = 200, message = '', data = []) => {
   };
 };
 
+// For standard error response throughout the API endpoints
 const errorResponse = (errors = [], code = 422, message = '', data = []) => {
   message = message || 'Invalid request data. Please review request and try again.';
 
