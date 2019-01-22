@@ -16,11 +16,7 @@ const validateReq = (obj, schema) => Joi.validate(obj, schema, validationOptions
   if (err) {
     isInvalid = true;
     const errors = _.map(err.details, ({ message }) => message.replace(/['"]/g, ''));
-    invalidResponse = response(
-      422,
-      'Invalid request data. Please review request and try again.',
-      errors
-    );
+    invalidResponse = errorResponse(errors);
   }
 
   return { isInvalid, invalidResponse };
@@ -36,4 +32,15 @@ const response = (code = 200, message = '', data = []) => {
   };
 };
 
-module.exports = { validateReq, response };
+const errorResponse = (errors = [], code = 422, message = '', data = []) => {
+  message = message || 'Invalid request data. Please review request and try again.';
+
+  return {
+    code: code,
+    message: message,
+    data: data,
+    errors: errors
+  };
+};
+
+module.exports = { validateReq, response, errorResponse };
