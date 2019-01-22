@@ -6,26 +6,25 @@ const articleSchema = require('../joi/articleSchema');
 const articles = {
   index: (req, res) => {
     logger.log('>> articles.index');
+    let { offset } = req.query;
+    offset = offset || '';
+    const limit = process.env.PAGE_LIMIT ? parseInt(process.env.PAGE_LIMIT) : 20;
 
     const articlesRef = firebaseDB.ref(`${process.env.FRP}/articles`);
 
-    articlesRef.on(
-      'value',
-      snapshot => {
+    articlesRef
+      .orderByKey()
+      .startAt(offset)
+      .limitToFirst(limit)
+      .once('value')
+      .then(snapshot => {
         const snap = snapshot.val();
         if (snap) {
           res.json(common.response(200, 'Articles found successfully.', formatData(snap)));
         } else {
           res.json(common.response(204, 'No articles found!'));
         }
-
-        articlesRef.off('value');
-      },
-      errorObject => {
-        logger.error(`The read failed: ${errorObject.code}`);
-        res.json(common.response(errorObject.code));
-      }
-    );
+      });
   },
   show: (req, res) => {
     logger.log('>> articles.show');
